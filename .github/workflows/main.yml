@@ -39,7 +39,7 @@ jobs:
         id: last-commit-message
         run: |
           #echo "::set-output name=msg::$(git log -1 --pretty=%s)" 
-          git log -1 --pretty=%s
+          git log -1 --pretty=%ad
           
           
           
