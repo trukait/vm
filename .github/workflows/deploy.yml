@@ -58,7 +58,7 @@ jobs:
         if: ${{ steps.generate_number.outputs.random_number == 0 }}
         run: |
           echo "😊😊😊😊😊😊success excute shell😊😊😊😊😊😊"
-          sleep 150
+          sleep 180
         #run: |
           #if [[ ${{ steps.generate_number.outputs.random_number }} == 0 ]]; then exit 0; else exit 1; fi
       - name: heroku-deploy
