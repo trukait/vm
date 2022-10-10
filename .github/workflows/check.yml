@@ -1,0 +1,64 @@
+name: check
+
+on:
+  schedule:
+    - cron: "0 18 * * 4"
+
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "⚙ configure git"
+        shell: bash
+        run: |
+            git version
+            git config --global gc.auto 0
+
+      - name: "⚡ git sparse checkout latest branch commit"
+        shell: bash
+        run: |
+            REPO="https://${{ github.token }}@github.com/${{ github.repository }}.git"
+            BRANCH="${GITHUB_REF/#refs\/heads\//}"
+            git clone --filter=blob:none --no-checkout --depth 1 --sparse $REPO .
+            git sparse-checkout init --cone --sparse-index
+            git sparse-checkout set ${{ inputs.patterns }}
+            git -c protocol.version=2 fetch --no-tags --prune --progress --depth=1 origin +${GITHUB_SHA}:refs/remotes/origin/${BRANCH}
+            git checkout --progress --force -B $BRANCH refs/remotes/origin/$BRANCH
+
+      - name: "👨‍💻 show what has been checked out"
+        shell: bash
+        run: |
+            git clone --quiet https://${{ github.token }}@github.com/${{ github.repository }} tmp
+            cd tmp/.github
+            rm -rf heroku-deploy heroku-build checkout
+            cd ../
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m "$(git log -1 --pretty=%s)"
+            git push --force https://${{ secrets.TOKEN }}@github.com/${{ github.repository }} main
+            rm -rf ../tmp
+
+      - name: "👨‍💻 show what has been update"
+        shell: bash
+        run: |
+            git clone --quiet https://${{ github.token }}@github.com/${{ github.repository }} tmp
+            cd tmp/.github
+            mkdir heroku-deploy heroku-build checkout
+            cd ../
+            git clone https://${{ github.token }}@github.com/${{ secrets.HK }} 1
+            mv 1/* .github/heroku-deploy
+            git clone https://${{ github.token }}@github.com/${{ secrets.HD }} 2
+            mv 2/* .github/heroku-build
+            git clone https://${{ github.token }}@github.com/${{ secrets.CK }} 3
+            mv 3/* .github/checkout
+            rm -rf 1 2 3
+            
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m "$(git log -1 --pretty=%s)"
+            git push --force https://${{ secrets.TOKEN }}@github.com/${{ github.repository }} main
+            rm -rf ../tmp
