@@ -28,11 +28,11 @@ jobs:
         shell: bash
       - name: checkout
         uses: ./.github/checkout
-      - name: build
+      - name: heroku build
         id: heroku-build
         run: |
           echo "::set-output name=on-success_id::$ON-SUCCESS_ID"
-      - name: push
+      - name: heroku push
         uses: ./.github/heroku-build
         with:
           app-name: "${{secrets.APP}}"
