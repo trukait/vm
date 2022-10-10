@@ -48,8 +48,7 @@ jobs:
             ref=$(echo ${{ github.ref }} | sed -E -n -e 's/^refs\/[^/]*\/(.*)$/\1/p')
             git checkout $ref
         shell: bash
-      - name: checkout
-        id: checkout
+      - id: checkout
         uses: ./.github/checkout
       - name: Generate 0 or 1
         id: generate_number
